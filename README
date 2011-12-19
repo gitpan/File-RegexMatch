@@ -1,6 +1,6 @@
 File::RegexMatch - Extension to help find files using regular expressions.
 
-Version 0.01
+Version 0.02
 
 This is an easy-to-use file searching module. Further documentation can be found on the CPAN (http://search.cpan.org/~lloydg).
 

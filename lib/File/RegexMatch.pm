@@ -10,7 +10,7 @@ require Exporter;
 
 our @ISA     = qw(Exporter);
 our @EXPORT  = qw(new match);
-our $VERSION = "0.01";
+our $VERSION = "0.02";
 
 sub new 
 {
@@ -124,7 +124,7 @@ sub _populate_match_hash
 	{
 		# Solves the problem of some keys having double slashes
 		$key =~ s/\/{2,}/\//g;
-		chdir($key) or warn "Cannot chdir to $key: $!\n" if $self->{verbose};
+		chdir($key);
 		my @files = glob("*");
 		
 		foreach(@files)

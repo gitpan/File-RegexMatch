@@ -1,4 +1,7 @@
 Revision history for Perl module File::RegexMatch
 
-0.01 Sat Dec 17 19:54:22 2011
+0.02 Mon Dec 19
+    - was a problem when verbose was disabled, now fixed.
+
+0.01 Sat Dec 17 
     - original version; created by ExtUtils::ModuleMaker 0.51

@@ -10,5 +10,5 @@ $regexmatch = File::RegexMatch->new( verbose => 1 );
 ok  ( defined $regexmatch);
 ok  ( $regexmatch->isa('File::RegexMatch') );
 is  ( $regexmatch->{verbose}, 1 );
-ok  ( @ret = $regexmatch->match(base_directory => ".", expression => qr/^.*$/) );
+ok  ( @ret = $regexmatch->match(base_directory => ".", pattern => qr/^.*$/) );
 ok  ( defined @ret );

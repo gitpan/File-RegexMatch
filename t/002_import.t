@@ -10,4 +10,4 @@ $regexmatch = File::RegexMatch->new( verbose => 1 );
 ok  ( defined $regexmatch);
 ok  ( $regexmatch->isa('File::RegexMatch') );
 is  ( $regexmatch->{verbose}, 1 );
-ok  ( $regexmatch->match(base_directory => ".", expression => qr/^.*$/) );
+ok  ( $regexmatch->match(base_directory => ".", pattern => qr/^.*$/) );

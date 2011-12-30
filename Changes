@@ -1,5 +1,13 @@
 Revision history for Perl module File::RegexMatch
 
+0.03 Thur Dec 29
+    - now checks hidden files for matches
+    - updated documentation
+    - if the given base directory path is relative, the absolute path of the files found in the base directory are returned instead of the relative path
+    - warnings added for chdir if verbose is enabled
+    - support for hidden files added
+    - cleanup of code
+
 0.02 Mon Dec 19
     - was a problem when verbose was disabled, now fixed.
 

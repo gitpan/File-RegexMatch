@@ -10,7 +10,7 @@ require Exporter;
 
 our @ISA     = qw(Exporter);
 our @EXPORT  = qw(new match);
-our $VERSION = "0.02";
+our $VERSION = "0.03";
 
 sub new 
 {
@@ -34,7 +34,8 @@ sub match
 	my %param = @_;
 	my %opts  = (
 		base_directory => undef,
-		expression     => undef,
+		pattern        => undef,
+		include_hidden => 0,
 	);
 	
 	while(my ($key, $value) = each %param)
@@ -42,29 +43,33 @@ sub match
 		$opts{$key} = $value if exists $opts{$key};
 	}
 	
-	croak "Expression must be a Regexp reference"
-		unless ref($opts{expression}) eq "Regexp";
+	croak "No value given for base_directory."
+		unless $opts{base_directory};
+
+	croak "Pattern must be a Regexp reference"
+		unless ref $opts{pattern} eq "Regexp";
 
 	# Locate files which match the given regex and 
 	# the directories which they're associated with
 	my %associated_matches = &_populate_match_hash(
 		$self,
 		$opts{base_directory}, 
-		$opts{expression}
+		$opts{pattern},
+		$opts{include_hidden},
 	);
 
-	die "No files found matching the given expression\n"
+	die "No files found matching the given pattern\n"
 		unless %associated_matches;
 
 	# Merge the hash so we can return an array
-	my @absolute_matches = &_hash_to_array(
+	my @absolute_matches = &_merge_hash(
 		%associated_matches
 	);
 
 	return @absolute_matches;
 }
 
-sub _hash_to_array
+sub _merge_hash
 {
 	my %associated_files = @_;
 	my @absolute_files   = ();
@@ -73,7 +78,7 @@ sub _hash_to_array
 	{
 		foreach(@{$associated_files{$key}})
 		{
-			push(@absolute_files, "$key/$_");
+			push @absolute_files, "$key/$_";
 		}
 	}
 
@@ -84,16 +89,26 @@ sub _populate_match_hash
 {
 	my $self       = shift;
 	my $directory  = shift;
-	my $expression = shift;
+	my $pattern    = shift;
+	my $hidden     = shift;	
+
+	chdir $directory or croak "Unable to chdir into $directory: $!\n";
 	
-	chdir($directory) or croak "Unable to chdir into $directory: $!\n";
-	
-	my @base_files  = glob("*");
 	my %directories = ();
 	my %match_hash  = ();
 	my @match_array = ();
+	my @base_files  = ();
+
+	if($hidden)
+	{
+		@base_files = glob ".* *";
+	}
+	else
+	{
+		@base_files = glob "*";
+	}
 	
-	tie(%directories, "Tie::IxHash");
+	tie %directories, "Tie::IxHash";
 	
 	foreach(@base_files)
 	{
@@ -107,28 +122,48 @@ sub _populate_match_hash
 		}
 		else
 		{
-			if(m/$expression/)
+			if(m/$pattern/)
 			{
 				print "Associating file $_ to $directory\n" if $self->{verbose};
-				push(@match_array, $_);
+				push @match_array, $_;
 			}
 		}
 	}
 	
 	# If there are files which match the regex in the base directory
 	# associate them
-	$match_hash{$directory} = [@match_array] if @match_array;
+	$match_hash{&cwd} = [@match_array] if @match_array;
 	@match_array = ();
 	
 	while(my ($key, $value) = each %directories)
 	{
 		# Solves the problem of some keys having double slashes
 		$key =~ s/\/{2,}/\//g;
-		chdir($key);
-		my @files = glob("*");
-		
+
+		if($self->{verbose})
+		{
+			chdir $key or warn "Cannot chdir into $key: $!\n";
+		}
+		else
+		{
+			chdir $key;
+		}
+
+		my @files = ();
+
+		if($hidden)
+		{
+			@files = glob ".* *";
+		}
+		else
+		{
+			@files = glob "*";
+		}
+
 		foreach(@files)
 		{
+			next if m/^(\.|\.\.)$/;
+
 			if(-d)
 			{
 				print "Adding directory $_ to hash\n" if $self->{verbose};
@@ -136,10 +171,10 @@ sub _populate_match_hash
 			}
 			else
 			{
-				if(m/$expression/)
+				if(m/$pattern/)
 				{
 					print "Associating file $_ to $key\n" if $self->{verbose};
-					push(@match_array, $_);
+					push @match_array, $_;
 				}
 			}
 		}
@@ -154,7 +189,7 @@ sub _populate_match_hash
 	}
 
 	# Return to the base directory when we finish
-	chdir($directory);
+	chdir $directory;
 
 	return %match_hash;
 }
@@ -165,52 +200,56 @@ __END__
 
 =head1 NAME
 
-File::RegexMatch - Extension to help find files using regular expressions.
+File::RegexMatch - Extension to help find files using regular expressions
 
 =head1 SYNOPSIS
 
-	#!/usr/bin/env perl
+	#!/usr/bin/env perl -w
 
 	use strict;
-	use warnings;
 	use File::RegexMatch;
 
 	my $regexmatch = File::RegexMatch->new(
-                verbose => 1
+		verbose => 1,
 	);
+
 	my @ret = $regexmatch->match(
-                base_directory => "/home/user/public_html",
-                expression     => qr/\.pl$/
+		base_directory => "/home/user/public_html",
+		pattern        => qr/\.pl$/,
+		include_hidden => 0,                
 	);
 
 	foreach(@ret) { ... }
 
 =head1 DESCRIPTION
 
-This module provides a subroutine to return the absolute path of each file
-found matching a given regular expression.
+This module provides a subroutine which traverses a directory tree
+and returns an array of files which match a given regular expression. 
+The absolute path for each matching file is returned.
 
 =head1 METHODS
 
-=head2 new
+=head3 new
 
-Creates a new File::RegexMatch object. An optional argument for 
-verbose can be passed to it. The value should be a boolean.
+C<< $regexmatch = File::RegexMatch->new() >>
 
-	my $regexmatch = File::RegexMatch->new(
-		verbose => 1,
-	);
+Creates a new File::RegexMatch object. An optional argument for verbose can be passed to it, default value is 0.
 
-=head2 match
+=head3 match
 
-Returns an array of files that match a given regular expression.  
-It requires two parameters, B<base_directory> and B<expression>. 
-expression must be a Regexp reference.
+C<< $regexmatch->match() >>
 
-	$regexmatch->match(
-		base_directory => "/home/user/public_html",
-		expression     => qr/\.pl$/,
-	);
+Takes three parameters, C<base_directory>, C<expression> and C<include_hidden>. 
+
+The C<base_directory> parameter defines the directory which is to be traversed. 
+Either a relative or absolute path can be given. 
+
+The C<pattern> parameter is the regular expression that you want to match files against. 
+This must be a regexp referece or the subroutine will complain.
+
+
+The C<include_hidden> parameter lets the subroutine know if it should include hidden files (files beginning with a .) 
+in the search. The value given should be a boolean, but the subroutine won't complain if it's not.
 
 =head1 BUGS
 

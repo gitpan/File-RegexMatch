@@ -1,12 +1,11 @@
-MANIFEST
-README
-LICENSE
-Todo
 Changes
-Makefile.PL
 lib/File/RegexMatch.pm
+lib/File/RegexMatch/File.pm
+LICENSE
+Makefile.PL
+MANIFEST			This list of files
+README
 t/001_load.t
-t/002_import.t
-t/003_return.t
+Todo
 META.yml                                 Module YAML meta-data (added by MakeMaker)
 META.json                                Module JSON meta-data (added by MakeMaker)

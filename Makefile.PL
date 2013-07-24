@@ -1,14 +1,17 @@
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-	NAME         => 'File::RegexMatch',
-	VERSION_FROM => 'lib/File/RegexMatch.pm',
-	AUTHOR       => 'Lloyd Griffiths (lloydg@singletasker.co.uk)',
-	ABSTRACT     => 'Extension to match files using regular expressions',
-	PREREQ_PM    => {
-		'Test::Simple' => 0.44,
-		'Cwd'          => 3.31,
-		'Carp'         => 1.17,
-		'Tie::IxHash'  => 1.12,
-	},
+    NAME         => 'File::RegexMatch',
+    VERSION_FROM => 'lib/File/RegexMatch.pm',
+    AUTHOR       => 'Lloyd Griffiths (lloydg@cpan.org)',
+    ABSTRACT     => 'Module to help locate files using regular expressions.',
+    LICENSE      => 'perl',
+    PREREQ_PM    => {
+                        'Test::Simple'  => 0.44,
+                        'Cwd'           => 3.12,
+                        'Carp'          => 1.04,
+                        'File::Spec'    => 3.12,
+                        'Tie::IxHash'   => 1.23,
+                        'File::stat'    => 0,
+                    },
 );

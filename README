@@ -1,19 +1,18 @@
-File::RegexMatch - Extension to help find files using regular expressions.
+File::RegexMatch - Extension to help find files using regular expressions. (Version 0.04)
 
-Version 0.03
-
-This is an easy to use file searching module. It returns the absolute of each file found matching a given regular expression. 
+This is an easy-to-use file searching module. It returns File::RegexMatch::File objects,
+each representing a file thats filename matches a provided regular expression.
 
 Further documentation can be found on the CPAN (http://search.cpan.org/~lloydg).
 
-INSTALLATION
-
-	perl Makefile.PL
-	make
-	make test
-	make install
-
-COPYRIGHT
-
-This program is free software; you can redistribute
-it and/or modify it under the same terms as Perl itself.
+INSTALLATION:
+    perl Makefile.PL
+    make test install clean all
+    
+PREREQUISITES
+    Test::Simple  => 0.44
+    Cwd           => 3.12
+    Carp          => 1.04
+    File::Spec    => 3.12
+    Tie::IxHash   => 1.23
+    File::stat    => 0

@@ -1,12 +1,12 @@
 {
-   "abstract" : "Extension to match files using regular expressions",
+   "abstract" : "Module to help locate files using regular expressions.",
    "author" : [
-      "Lloyd Griffiths (lloydg@singletasker.co.uk)"
+      "Lloyd Griffiths (lloydg@cpan.org)"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "ExtUtils::MakeMaker version 6.62, CPAN::Meta::Converter version 2.112621",
+   "generated_by" : "ExtUtils::MakeMaker version 6.6302, CPAN::Meta::Converter version 2.120921",
    "license" : [
-      "unknown"
+      "perl_5"
    ],
    "meta-spec" : {
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
@@ -22,23 +22,25 @@
    "prereqs" : {
       "build" : {
          "requires" : {
-            "ExtUtils::MakeMaker" : 0
+            "ExtUtils::MakeMaker" : "0"
          }
       },
       "configure" : {
          "requires" : {
-            "ExtUtils::MakeMaker" : 0
+            "ExtUtils::MakeMaker" : "0"
          }
       },
       "runtime" : {
          "requires" : {
-            "Carp" : "1.17",
-            "Cwd" : "3.31",
+            "Carp" : "1.04",
+            "Cwd" : "3.12",
+            "File::Spec" : "3.12",
+            "File::stat" : "0",
             "Test::Simple" : "0.44",
-            "Tie::IxHash" : "1.12"
+            "Tie::IxHash" : "1.23"
          }
       }
    },
    "release_status" : "stable",
-   "version" : "0.03"
+   "version" : "0.1"
 }

@@ -24,4 +24,4 @@ requires:
   File::stat: 0
   Test::Simple: 0.44
   Tie::IxHash: 1.23
-version: 0.1
+version: v0.1.1

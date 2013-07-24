@@ -12,7 +12,7 @@ require Exporter;
 
 our @ISA = qw(Exporter);
 our @EXPORT = qw(new match);
-our $VERSION = '0.1';
+our $VERSION = '0.1.1';
 
 sub new {
     my ($class, %params) = @_;
@@ -139,18 +139,18 @@ File::RegexMatch - Module to help locate files using regular expressions.
 
 =head1 SYNOPSIS
 
-#!/usr/bin/env perl -w
+    #!/usr/bin/env perl -w
 
-use strict;
-use File::RegexMatch;
+    use strict;
+    use File::RegexMatch;
 
-foreach (File::RegexMatch->new(verbose => 1)->match(
-    base_directory => "/home/user/public_html",
-    regex_pattern  => qr/\.pl$/,
-    include_hidden => 0
-)) {
-    print $_->path() . "\n";
-}
+    foreach (File::RegexMatch->new(verbose => 1)->match(
+        base_directory => "/home/user/public_html",
+        regex_pattern  => qr/\.pl$/,
+        include_hidden => 0
+    )) {
+        print $_->path() . "\n";
+    }
 
 =head1 DESCRIPTION
 
@@ -184,7 +184,7 @@ include hidden files in its search. By default it is set to false.
 
 =head1 SEE ALSO
 
-File::Find
+File::RegexMatch::File
 
 =head1 BUGS
 

@@ -12,7 +12,7 @@ require Exporter;
 
 our @ISA = qw(Exporter);
 our @EXPORT = qw(new match);
-our $VERSION = '0.1.1';
+our $VERSION = '0.1.2';
 
 sub new {
     my ($class, %params) = @_;
@@ -31,7 +31,8 @@ sub match {
     my ($self, %params) = @_;
     my %opts = (
         base_directory => $ENV{HOME},
-        regex_pattern  => qr/.*/,
+        match_pattern  => qr/.*/,
+        ignore_pattern => undef,
         include_hidden => 0,
     );
 
@@ -41,9 +42,13 @@ sub match {
 
     my @matched = ();
     my %matched_refs = $self->__populate(
-        $opts{base_directory}, $opts{regex_pattern}, $opts{include_hidden}
+        $opts{base_directory}, $opts{match_pattern}, $opts{ignore_pattern}, $opts{include_hidden}
     );
 
+    # We need to dereference the array of matches
+    # for each of the directories, then create a new
+    # instance of the File::RegexMatch::File object
+    # for each of the files.
     while (my ($key, $value) = each %matched_refs) {
         foreach (@{$value}) {
             push @matched, File::RegexMatch::File->new(
@@ -56,9 +61,10 @@ sub match {
 }
 
 sub __populate {
-    my ($self, $directory, $pattern, $include_hidden) = @_;
+    my ($self, $directory, $match_pattern, $ignore_pattern, $include_hidden) = @_;
     my (%directories, %matches, @matches, @base) = ();
 
+    # Change to the base directory
     chdir $directory;
 
     if ($include_hidden) {
@@ -71,7 +77,7 @@ sub __populate {
     tie %directories, "Tie::IxHash";
 
     # Collect files and directories from the base directory
-    $self->__collect($pattern, \@base, \@matches, \%directories);
+    $self->__collect($match_pattern, $ignore_pattern, \@base, \@matches, \%directories);
     $self->__feedback(scalar @matches) if $self->{verbose} and scalar @matches;
 
     # Assign the matching files to the hash if there are any
@@ -91,7 +97,7 @@ sub __populate {
         }
 
         # Collect files and directories from the current directory
-        $self->__collect($pattern, \@files, \@matches, \%directories);
+        $self->__collect($match_pattern, $ignore_pattern, \@files, \@matches, \%directories);
         $self->__feedback(scalar @matches) if $self->{verbose} and scalar @matches;
         $matches{$key} = [@matches] if @matches;
         $directories{$key} = [@files] if @files;
@@ -101,22 +107,27 @@ sub __populate {
         @matches = ();
     }
 
-    # Return to the initial directory
-    chdir $directory;
     return %matches;
 }
 
 sub __collect {
-    my ($self, $pattern, $items, $matches, $directories) = @_;
-
+    my ($self, $match_pattern, $ignore_pattern, $items, $matches, $directories) = @_;
+    
     foreach (@{$items}) {
         if (m/^(\.|\.\.)$/) {
             next;
         } elsif (-d) {
             # Add each directory to the hash
             $directories->{File::Spec->catfile(cwd(), $_)} = undef;
-        } elsif (m/$pattern/) {
-            # If the file matches the regex pattern push it onto the array
+        } elsif (defined $ignore_pattern and (m/$match_pattern/ and not m/$ignore_pattern/)) {
+            # If the file matches the regex pattern and
+            # doesn't match the ignore pattern push it
+            # onto the matches array.
+            push @{$matches}, $_;
+        } elsif (not defined $ignore_pattern and m/$match_pattern/) {
+            # If the file matches the regex pattern and
+            # we're not ignoring any patter, push it onto
+            # the matches array.
             push @{$matches}, $_;
         } else {
             next;
@@ -146,7 +157,8 @@ File::RegexMatch - Module to help locate files using regular expressions.
 
     foreach (File::RegexMatch->new(verbose => 1)->match(
         base_directory => "/home/user/public_html",
-        regex_pattern  => qr/\.pl$/,
+        match_pattern  => qr/(java|class)/,
+        ignore_pattern => qr/(\.java|\.class)$/,
         include_hidden => 0
     )) {
         print $_->path() . "\n";
@@ -157,7 +169,7 @@ File::RegexMatch - Module to help locate files using regular expressions.
 This module provides the functionality to traverses a directory tree
 and return an array of File::RegexMatch::File objects. Each file that
 is returned has a filename that matches the regular expression that is
-passed to the C<match> subroutine.
+passed to the C< match > subroutine.
 
 =head1 METHODS
 
@@ -169,18 +181,21 @@ value is 0 (false) by default.
 
 =head3 match
 
-This method takes up to three parameter, C< base_directory >, C< regex_pattern >
+This method takes up to three parameter, C< base_directory >, C< match_pattern >
 and C< include_hidden >.
 
 The C< base_directory > parameter defines the directory which the method should
 start traversing. An absolute or relative path can be used. The default value
 for this is C< $ENV{HOME} > - the users home directory.
 
-The C<regex_pattern> parameter is the regular expression that you wish to match
+The C< match_pattern > parameter is the regular expression that you wish to match
 file names against. The default value of this parameter is C< qr/.*/ >.
 
+The C< ignore_pattern> parameter defines the regular expression that states which
+file names should be ignored. This is undefined by default.
+
 The C<include_hidden> parameter should be set to true if the method should
-include hidden files in its search. By default it is set to false.
+include hidden files in its search. By default this is set to false (0).
 
 =head1 SEE ALSO
 
@@ -198,7 +213,7 @@ Lloyd Griffiths
 
 Copyright (c) 2011-2013 Lloyd Griffiths
 
-This library is free software; you can redistribute
+This software is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.
 
 =cut

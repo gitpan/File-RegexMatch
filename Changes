@@ -1,5 +1,9 @@
 Revision history for Perl module File::RegexMatch
 
+0.1.2 Mon July 29 2013
+    - Renamed match() parameter from regex_pattern to match_pattern.
+    - Added functionality to ignore file names based on regular expression.
+
 0.1.1 Wed July 24 2013
     - Updated documentation
 

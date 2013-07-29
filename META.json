@@ -42,5 +42,10 @@
       }
    },
    "release_status" : "stable",
-   "version" : "v0.1.1"
+   "resources" : {
+      "repository" : {
+         "url" : "https://github.com/LloydGriffiths/File-RegexMatch"
+      }
+   },
+   "version" : "v0.1.2"
 }

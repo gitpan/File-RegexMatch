@@ -26,4 +26,4 @@ requires:
   Tie::IxHash: 1.23
 resources:
   repository: https://github.com/LloydGriffiths/File-RegexMatch
-version: v0.1.2
+version: v0.1.2.01

@@ -12,7 +12,7 @@ require Exporter;
 
 our @ISA = qw(Exporter);
 our @EXPORT = qw(new match);
-our $VERSION = '0.1.2';
+our $VERSION = '0.1.2.01';
 
 sub new {
     my ($class, %params) = @_;
@@ -81,7 +81,7 @@ sub __populate {
     $self->__feedback(scalar @matches) if $self->{verbose} and scalar @matches;
 
     # Assign the matching files to the hash if there are any
-    $matches{cwd()} = [@matches] if @matches;
+    $matches{File::Spec->canonpath(cwd())} = [@matches] if @matches;
 
     # Unset the matches ready for the next directory
     @matches = ();
@@ -126,7 +126,7 @@ sub __collect {
             push @{$matches}, $_;
         } elsif (not defined $ignore_pattern and m/$match_pattern/) {
             # If the file matches the regex pattern and
-            # we're not ignoring any patter, push it onto
+            # we're not ignoring any pattern, push it onto
             # the matches array.
             push @{$matches}, $_;
         } else {
@@ -137,7 +137,8 @@ sub __collect {
 
 sub __feedback {
     my ($self, $count) = @_;
-    print $count . ' matching files found in ' . File::Spec::->catdir(cwd()) . "\n";
+    local $/ = "\n";
+    print $count . ' matching files found in ' . File::Spec::->catdir(cwd());
 }
 
 1;
@@ -213,7 +214,7 @@ Lloyd Griffiths
 
 Copyright (c) 2011-2013 Lloyd Griffiths
 
-This software is free software; you can redistribute
+This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.
 
 =cut
